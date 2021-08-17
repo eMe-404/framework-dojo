@@ -1,0 +1,15 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>DependencyInjection</title>
+</head>
+<body>
+<p class="DojoContainer">
+    in Dojo context the runtime environment is called `container`, and it will be instantiated during
+    <span class="function" data-action="initApplication"> application start time</span>,<br>
+    after application instantiated you can retrieve the active `container` detail by `DojoContextUtils.getDojoContainer()`<br>
+    the retrieved result should not be
+    <span class="assertion" data-expect="equal" data-action="retrieveActiveContainer">null</span>
+</p>
+</body>
+</html>

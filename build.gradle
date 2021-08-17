@@ -1,15 +1,28 @@
+import com.thoughtworks.fusheng.FushengPlugin
+
+buildscript {
+    dependencies {
+    classpath files('./temp-external-libs/fusheng-v1.jar')
+    }
+}
+
 plugins {
     id 'java'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+apply plugin: FushengPlugin
+
+group 'org.yaer'
+version 'v1'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation files("$projectDir/temp-external-libs/runner.jar")
+    implementation group: 'javax.inject', name: 'javax.inject', version: '1'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.20.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 }
