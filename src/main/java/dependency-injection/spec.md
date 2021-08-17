@@ -1,18 +1,3 @@
-# related spec
-
-- JSR 330 → This package provides dependency injection annotations that enable portable classes, but it leaves external dependency configuration up to the injector implementation
-    - Inject
-    - Qualifier
-    - Named
-    - Scope
-    - Singleton
-    - Provider
-- JSR 365 → Contexts and Dependency Injection for Java 2.0
-    - spec: [https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html](https://docs.jboss.org/cdi/spec/2.0/cdi-spec.html)
-- managed  bean → [https://jakarta.ee/specifications/managedbeans/2.0/jakarta-managed-beans-spec-2.0](https://jakarta.ee/specifications/managedbeans/2.0/jakarta-managed-beans-spec-2.0)
-- Java Enterprise Bean Spec → [https://jakarta.ee/specifications/enterprise-beans/4.0/jakarta-enterprise-beans-spec-core-4.0.html](https://jakarta.ee/specifications/enterprise-beans/4.0/jakarta-enterprise-beans-spec-core-4.0.html)
-- bean validation spec → [https://beanvalidation.org/2.0/spec/#introduction](https://beanvalidation.org/2.0/spec/#introduction)
-
 ## Reference implementation
 
 The following dependency injection systems have passed the TCK:
