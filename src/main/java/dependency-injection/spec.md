@@ -11,13 +11,11 @@ The following dependency injection systems have passed the TCK:
 # SBE
 
 - This runtime environment is called the **container**
-- A Java class is a managed bean if it meets all of the following conditions:
+- A Java class is a managed bean if it meets all the following conditions:
     - It is not an inner class.
-    - It is a non-abstract class, or is annotated `@Decorator`.
-    - It does not implement `javax.enterprise.inject.spi.Extension`.
     - It has an appropriate constructor - either:
         - the class has a constructor with no parameters, or
-        - the class declares a constructor annotated `@Inject`.
+        - the class declares a constructor annotated `@Inject`.
     - e.g.
 
     ```java
@@ -30,26 +28,26 @@ The following dependency injection systems have passed the TCK:
     - e.g. The container provides built-in support for injection and contextual lifecycle management of the following kinds of bean
         - Managed beans
         - Producer methods and fields
+- If a bean class does not explicitly declare a constructor using @Inject, the constructor that accepts no parameters is the bean constructor.
 - container can inject dependency by bean constructor
 
     ```java
     public class Bar {
-    	private final Foo foo;
+        private final Foo foo;
 
       @Inject
       Bar(Foo foo){
-    		this.foo = foo;
+            this.foo = foo;
       }
     } 
     ```
 
-- If a bean class does not explicitly declare a constructor using @Inject, the constructor that accepts no parameters is the bean constructor.
 - If a bean class has more than one constructor annotated @Inject, the container automatically detects the problem and treats it as a definition error.
 - container can inject dependency by bean filed(non-static, non-final)
 
     ```java
     public class Bar {
-    	@Inject private Foo foo;
+        @Inject private Foo foo;
     } 
     ```
 
@@ -57,10 +55,10 @@ The following dependency injection systems have passed the TCK:
 
     ```java
     public class Bar {
-    	private Foo foo;
+        private Foo foo;
 
-    	@Inject public Foo setFoo(Foo foo){
-    		this.foo = foo;
+        @Inject public Foo setFoo(Foo foo){
+            this.foo = foo;
       }
     } 
     ```
