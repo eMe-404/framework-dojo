@@ -1,14 +1,16 @@
 package dependency_injection;
 
+
 import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 
 @FuShengTest
-public class DojoContainer {
-    void initApplication() {
+public class DojoContainerTest {
+    public void initApplication() {
         DojoContextUtils.initApplication();
     }
 
-    DojoContainer retrieveActiveContainer() {
+    public DojoContainer retrieveActiveContainer() {
+        DojoContextUtils.initApplication();
         return DojoContextUtils.retrieveDojoContainer();
     }
 }
