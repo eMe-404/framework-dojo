@@ -9,8 +9,9 @@ public class DojoContainerTest {
         DojoContextUtils.initApplication();
     }
 
-    public DojoContainer retrieveActiveContainer() {
+    public String retrieveActiveContainer() {
         DojoContextUtils.initApplication();
-        return DojoContextUtils.retrieveDojoContainer();
+        DojoContainer dojoContainer = DojoContextUtils.retrieveDojoContainer();
+        return dojoContainer.initMessage();
     }
 }

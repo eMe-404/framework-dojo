@@ -2,12 +2,19 @@ import com.thoughtworks.fusheng.FushengPlugin
 
 buildscript {
     dependencies {
-    classpath files('./temp-external-libs/fusheng-v1.jar')
+        classpath files('./temp-external-libs/fusheng-v1.jar')
+    }
+}
+
+buildscript {
+    dependencies {
+        classpath files('./temp-external-libs/fusheng-v1.jar')
     }
 }
 
 plugins {
     id 'java'
+    id 'idea'
 }
 
 apply plugin: FushengPlugin

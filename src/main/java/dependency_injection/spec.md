@@ -8,6 +8,12 @@ The following dependency injection systems have passed the TCK:
 - Spring Framework 3.0
 - Weld 1.0.0
 
+# Q&A
+* can we include `notNull` assertion?
+* can we one fixture's result as a parameter of another fixture?
+* 
+
+
 # SBE
 
 ### in Dojo context the runtime environment is called `container`, and it will be instantiated during the application start time
