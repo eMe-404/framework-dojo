@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ManagedBean</title>
+</head>
+<body>
+<div class="example">
+    a managed bean can declare @Inject annotation at constructor to inject dependency
+    <br>
+    given <code>MyGreeter</code> class with <code>sayHi()</code> method which prints: "hello from Greeter" <br>
+    when <code>Baz</code> class use <code>@Inject</code> annotation at <b>constructor</b> to inject MyGreeter <br>
+    then <code>applicationContainer</code> responsible for the injection, and we can also call
+    <code>retrieveGreeterBless()</code> method on <code>Baz</code> class to check the message is
+    <span class="assertion" data-expect="equal" data-action="retrieveGreeterBless">hello from Greeter</span>
+</div>
+</body>
+</html>
