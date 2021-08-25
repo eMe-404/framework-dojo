@@ -381,3 +381,5 @@ class Foo {
 ```
 
 ### The container is required to support circular dependency (TBC)
+
+e.g. A-> B with construction injection, B -> A with construction injection will throw exception 
