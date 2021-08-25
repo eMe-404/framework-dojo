@@ -11,6 +11,8 @@ The following dependency injection systems have passed the TCK:
 # Q&A
 * can we include `notNull` assertion?
 * can we one fixture's result as a parameter of another fixture?
+* can not run whole file test
+* hard to write input related SBE 
 * 
 
 
@@ -203,10 +205,12 @@ public class BazTest {
 ```java
 
 @DojoComponent
+@Synchronous
 class SynchronousPaymentProcessor implements PaymentProcessor {
 }
 
 @DojoComponent
+@Asynchronous
 class AsynchronousPaymentProcessor implements PaymentProcessor {
 }
 
