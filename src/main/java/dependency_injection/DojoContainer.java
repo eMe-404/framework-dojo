@@ -1,16 +1,22 @@
 package dependency_injection;
 
 import dependency_injection.annotation.DojoComponent;
+import dependency_injection.exception.DojoContextInitException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.reflections.Reflections;
 
 public class DojoContainer {
     public static final String DEFAULT_PREFIX = "";
+    public static final String DEFAULT_INIT_MESSAGE = "container initialized successfully";
     private final HashMap<String, Object> beanMap;
 
     public DojoContainer() {
@@ -21,23 +27,64 @@ public class DojoContainer {
     private void registerBeans() {
         final Reflections reflections = new Reflections(DEFAULT_PREFIX);
         final Set<Class<?>> managedBeans = reflections.getTypesAnnotatedWith(DojoComponent.class);
-        managedBeans.forEach(aClass -> {
-            final Constructor<?>[] beanConstructors = aClass.getConstructors();
+        managedBeans.forEach(this::resolveBean);
+    }
+
+    private void resolveBean(final Class<?> aClass) {
+        if (beanMap.containsKey(aClass.getSimpleName())) {
+            return;
+        }
+        final Constructor<?>[] beanConstructors = aClass.getConstructors();
+        final Constructor<?> injectionPointConstructor = selectInjectionPointConstructor(aClass, beanConstructors);
+
+        resolveBeanWithSelectedConstructor(aClass, injectionPointConstructor);
+    }
+
+    private void resolveBeanWithSelectedConstructor(final Class<?> aClass, final Constructor<?> injectionPointConstructor) {
+        try {
+            final Object newInstance;
+            if (injectionPointConstructor.getParameterCount() > 0) {
+                List<Object> constructorArguments = new LinkedList<>();
+                for (Class<?> parameterType : injectionPointConstructor.getParameterTypes()) {
+                    if (!beanMap.containsKey(parameterType.getSimpleName())) {
+                        resolveBean(parameterType);
+                    }
+                    final Object resolvedBean = beanMap.get(parameterType.getSimpleName());
+                    constructorArguments.add(resolvedBean);
+                }
+                newInstance = injectionPointConstructor.newInstance(constructorArguments.toArray());
+            } else {
+                newInstance = injectionPointConstructor.newInstance();
+            }
+            beanMap.put(aClass.getSimpleName(), newInstance);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Constructor<?> selectInjectionPointConstructor(final Class<?> aClass, final Constructor<?>[] beanConstructors) {
+        final List<Constructor<?>> injectionAnnotatedConstructors =
+                Arrays.stream(beanConstructors)
+                        .filter(constructor -> constructor.isAnnotationPresent(Inject.class))
+                        .collect(Collectors.toList());
+
+        if (injectionAnnotatedConstructors.size() > 1) {
+            throw new DojoContextInitException(
+                    "more then one constructor annotated with @Inject annotation on class:" + aClass.getName());
+        }
+
+        if (injectionAnnotatedConstructors.isEmpty()) {
             final Optional<Constructor<?>> defaultConstructor =
                     Arrays.stream(beanConstructors).filter(constructor -> constructor.getParameterCount() == 0).findFirst();
-            defaultConstructor.ifPresent(constructor -> {
-                try {
-                    final Object newInstance = constructor.newInstance();
-                    beanMap.put(aClass.getSimpleName(), newInstance);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            });
-        });
+            return defaultConstructor.
+                    orElseThrow(() -> new DojoContextInitException("no eligible constructor for bean resolution"));
+        }
+
+        return injectionAnnotatedConstructors.get(0);
     }
 
     public String initMessage() {
-        return "container initialized successfully";
+        return DEFAULT_INIT_MESSAGE;
     }
 
     public Object retrieveBean(final String beanName) {
