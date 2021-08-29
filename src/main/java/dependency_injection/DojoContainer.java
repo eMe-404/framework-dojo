@@ -3,12 +3,13 @@ package dependency_injection;
 import dependency_injection.annotation.DojoComponent;
 import dependency_injection.exception.DojoContextInitException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -37,9 +38,64 @@ public class DojoContainer {
         }
 
         final Constructor<?>[] beanConstructors = aClass.getConstructors();
-        final Constructor<?> injectionPointConstructor = selectInjectionPointConstructor(aClass, beanConstructors);
+        final boolean hasConstructorAnnotated = Arrays.stream(beanConstructors)
+                .anyMatch(constructor -> constructor.isAnnotationPresent(Inject.class));
+        final Field[] classFields = aClass.getDeclaredFields();
+        final boolean hasFieldAnnotated = Arrays.stream(classFields)
+                .anyMatch(field -> field.isAnnotationPresent(Inject.class));
+        if (hasConstructorAnnotated) {
+            final Constructor<?> injectionPointConstructor = selectInjectionPointConstructor(aClass, beanConstructors);
+            resolveBeanWithSelectedConstructor(aClass, injectionPointConstructor);
+        } else if (hasFieldAnnotated) {
+            final List<Field> injectionPointFields =
+                    Arrays.stream(classFields).filter(field -> field.isAnnotationPresent(Inject.class)).collect(Collectors.toList());
+            checkFieldInjectionEligibility(injectionPointFields);
+            resolveBeanFieldInjection(aClass, injectionPointFields);
+        } else {
+            resolveDefaultConstructorCase(aClass);
+        }
+    }
 
-        resolveBeanWithSelectedConstructor(aClass, injectionPointConstructor);
+    private void resolveDefaultConstructorCase(final Class<?> aClass) {
+        try {
+            resolvedBeansFactory.put(aClass.getSimpleName(), aClass.getDeclaredConstructor().newInstance());
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void resolveBeanFieldInjection(final Class<?> aClass, final List<Field> injectionPointFields) {
+        injectionPointFields.forEach(field -> {
+            try {
+                final String filedTypeSimpleName = field.getType().getSimpleName();
+                if (!resolvedBeansFactory.containsKey(filedTypeSimpleName)) {
+                    resolveBean(field.getType());
+                }
+                final Object resolvedBean = resolvedBeansFactory.get(filedTypeSimpleName);
+                final Object classInstance;
+                if (!resolvedBeansFactory.containsKey(aClass.getSimpleName())) {
+                    classInstance = aClass.getDeclaredConstructor().newInstance();
+                } else {
+                    classInstance = resolvedBeansFactory.get(aClass.getSimpleName());
+                }
+                final boolean canAccess = field.canAccess(classInstance);
+                field.setAccessible(true);
+                field.set(classInstance, resolvedBean);
+                field.setAccessible(canAccess);
+                resolvedBeansFactory.put(aClass.getSimpleName(), classInstance);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void checkFieldInjectionEligibility(final List<Field> injectionPointFields) {
+        final Map<? extends Class<?>, Long> fieldsByType =
+                injectionPointFields.stream().collect(Collectors.groupingBy(Field::getType, Collectors.counting()));
+        final boolean moreInjectionForSameType = fieldsByType.values().stream().anyMatch(aLong -> aLong > 1);
+        if (moreInjectionForSameType) {
+            throw new DojoContextInitException("more then one filed of same Type annotated with @Inject annotation");
+        }
     }
 
     private void resolveBeanWithSelectedConstructor(final Class<?> aClass, final Constructor<?> injectionPointConstructor) {
@@ -78,13 +134,6 @@ public class DojoContainer {
         if (injectionAnnotatedConstructors.size() > 1) {
             throw new DojoContextInitException(
                     "more then one constructor annotated with @Inject annotation on class:" + aClass.getName());
-        }
-
-        if (injectionAnnotatedConstructors.isEmpty()) {
-            final Optional<Constructor<?>> defaultConstructor =
-                    Arrays.stream(beanConstructors).filter(constructor -> constructor.getParameterCount() == 0).findFirst();
-            return defaultConstructor.
-                    orElseThrow(() -> new DojoContextInitException("no eligible constructor for bean resolution"));
         }
 
         return injectionAnnotatedConstructors.get(0);
