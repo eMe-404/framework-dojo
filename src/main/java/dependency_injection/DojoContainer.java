@@ -17,11 +17,12 @@ import org.reflections.Reflections;
 public class DojoContainer {
     public static final String DEFAULT_PREFIX = "";
     public static final String DEFAULT_INIT_MESSAGE = "container initialized successfully";
-    private final HashMap<String, Object> beanMap;
+    private final HashMap<String, Object> resolvedBeansFactory = new HashMap<>();
 
-    public DojoContainer() {
-        beanMap = new HashMap<>();
-        registerBeans();
+    public static DojoContainer initWithManagedBeans() {
+        final DojoContainer dojoContainer = new DojoContainer();
+        dojoContainer.registerBeans();
+        return dojoContainer;
     }
 
     private void registerBeans() {
@@ -31,9 +32,10 @@ public class DojoContainer {
     }
 
     private void resolveBean(final Class<?> aClass) {
-        if (beanMap.containsKey(aClass.getSimpleName())) {
+        if (resolvedBeansFactory.containsKey(aClass.getSimpleName())) {
             return;
         }
+
         final Constructor<?>[] beanConstructors = aClass.getConstructors();
         final Constructor<?> injectionPointConstructor = selectInjectionPointConstructor(aClass, beanConstructors);
 
@@ -44,22 +46,27 @@ public class DojoContainer {
         try {
             final Object newInstance;
             if (injectionPointConstructor.getParameterCount() > 0) {
-                List<Object> constructorArguments = new LinkedList<>();
-                for (Class<?> parameterType : injectionPointConstructor.getParameterTypes()) {
-                    if (!beanMap.containsKey(parameterType.getSimpleName())) {
-                        resolveBean(parameterType);
-                    }
-                    final Object resolvedBean = beanMap.get(parameterType.getSimpleName());
-                    constructorArguments.add(resolvedBean);
-                }
-                newInstance = injectionPointConstructor.newInstance(constructorArguments.toArray());
+                newInstance = instantiateWithMultiArgument(injectionPointConstructor);
             } else {
                 newInstance = injectionPointConstructor.newInstance();
             }
-            beanMap.put(aClass.getSimpleName(), newInstance);
+            resolvedBeansFactory.put(aClass.getSimpleName(), newInstance);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    private Object instantiateWithMultiArgument(final Constructor<?> injectionPointConstructor)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        List<Object> constructorArguments = new LinkedList<>();
+        for (Class<?> parameterType : injectionPointConstructor.getParameterTypes()) {
+            if (!resolvedBeansFactory.containsKey(parameterType.getSimpleName())) {
+                resolveBean(parameterType);
+            }
+            final Object resolvedBean = resolvedBeansFactory.get(parameterType.getSimpleName());
+            constructorArguments.add(resolvedBean);
+        }
+        return injectionPointConstructor.newInstance(constructorArguments.toArray());
     }
 
     private Constructor<?> selectInjectionPointConstructor(final Class<?> aClass, final Constructor<?>[] beanConstructors) {
@@ -88,6 +95,6 @@ public class DojoContainer {
     }
 
     public Object retrieveBean(final String beanName) {
-        return beanMap.get(beanName);
+        return resolvedBeansFactory.get(beanName);
     }
 }

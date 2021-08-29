@@ -10,7 +10,7 @@ public class DojoContextUtils {
 
     public static void initApplication() {
         if (Objects.isNull(retrieveDojoContainer())) {
-            dojoContainer = new DojoContainer();
+            dojoContainer = DojoContainer.initWithManagedBeans();
         }
     }
 
