@@ -97,4 +97,8 @@ public class DojoContainer {
     public Object retrieveBean(final String beanName) {
         return resolvedBeansFactory.get(beanName);
     }
+
+    public void register(final Object manualAddedBean) {
+        resolveBean(manualAddedBean.getClass());
+    }
 }

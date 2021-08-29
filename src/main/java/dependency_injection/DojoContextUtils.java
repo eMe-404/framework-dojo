@@ -17,4 +17,8 @@ public class DojoContextUtils {
     public static DojoContainer retrieveDojoContainer() {
         return dojoContainer;
     }
+
+    public static DojoContainer newContainer() {
+        return new DojoContainer();
+    }
 }

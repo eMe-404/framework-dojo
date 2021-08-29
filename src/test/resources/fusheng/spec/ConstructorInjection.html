@@ -35,5 +35,15 @@
     and we can call <b>retrieveGreeterBless()</b> to print `MyGreeter` welcome message:
     <span class="assertion" data-expect="equal" data-action="retrieveGreeterBless" data-params="clientBeanName">hello from MyGreeter</span>
 </div>
+
+<br>
+<br>
+
+<div class="example">
+    at most <b>ONE</b> constructor can be annotated with @Inject annotation, <br>
+    if more than one annotated then the bean resolution will fail and
+    <span class="assertion" data-expect="equal" data-action="moreInjectAnnotationCase">DojoContextInitException</span>
+    exception will be thrown.
+</div>
 </body>
 </html>
