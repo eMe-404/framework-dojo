@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ManagedBean</title>
+</head>
+<body>
+<div class="example">
+    a managed bean can be injected by <code>@Inject</code> annotation<br>
+    given <code>MyGreeter</code> class with <code>sayHi()</code> method which can print "Hello from Greeter" message<br>
+    when we inject <code>MyGreeter</code> to class <code>Baz</code> <br>
+    then we are been able to call <code>retrieveGreeterBless()</code> method from <code>Baz</code> class to get same
+    message as above <code>sayHi()</code> method
+    <span class="assertion" data-expect="equal" data-action="retrieveGreeterBless">Hello from Greeter</span>
+</div>
+</body>
+</html>

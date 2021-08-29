@@ -1,5 +1,7 @@
 package dependency_injection;
 
+import java.util.Objects;
+
 public class DojoContextUtils {
     private static DojoContainer dojoContainer;
 
@@ -7,7 +9,9 @@ public class DojoContextUtils {
     }
 
     public static void initApplication() {
-        dojoContainer = new DojoContainer();
+        if (Objects.isNull(retrieveDojoContainer())) {
+            dojoContainer = new DojoContainer();
+        }
     }
 
     public static DojoContainer retrieveDojoContainer() {

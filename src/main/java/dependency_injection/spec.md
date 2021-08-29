@@ -9,10 +9,13 @@ The following dependency injection systems have passed the TCK:
 - Weld 1.0.0
 
 # Q&A
+## Tech
 * can we include `notNull` assertion?
-* can we one fixture's result as a parameter of another fixture?
-* can not run whole file test
-* hard to write input related SBE 
+* can we use one fixture's result as a **parameter** of another fixture?
+* [bug] if we run all tests in `fixture` folder then it will fail to run `tests` successfully 
+## DI related
+* as this written as Instruction, so it is hard to put `<input>` element in html
+that will cause the `experiment` function of **fusheng** not used
 * 
 
 

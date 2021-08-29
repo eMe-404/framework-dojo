@@ -6,13 +6,60 @@
 <body>
 <div class="example">
     <h3>container in dependency injection</h3>
-    in our application context the runtime environment is called `container`, it will be instantiated during
-    <span class="function" data-action="initApplication"> application start time</span>,<br>
+    in application context the runtime environment is called <code>container</code>, it will be instantiated during
+    application start time. <br>
     after application instantiated you can retrieve the active `container` detail by
     `DojoContextUtils.getDojoContainer()`<br>
-    the retrieved result should not be null, and can print welcome message
-    <span class="assertion" data-expect="equal"
-          data-action="retrieveActiveContainer">container initialized successfully</span>
+    you can see <span class="assertion" data-expect="equal" data-action="retrieveActiveContainer">container initialized successfully</span>
+    message if it started successfully.
 </div>
+
+<div class="description">
+    A Java class is a managed bean if it meets all the following conditions:
+    <ul>
+        <li>It is not an inner class.</li>
+        <li>It has an appropriate constructor - either:</li>
+        <ul>
+            <li>the class has a constructor with no parameters</li>
+            <li>the class declares a constructor annotated `@Inject`</li>
+        </ul>
+        <li>the class annotated with `@DojoComponent`</li>
+    </ul>
+    following two class both are managed bean.
+    <pre>
+    <code>
+        @DojoComponent
+        class Bar {
+        }
+
+        @DojoComponent
+        class PaymentProcessorImpl implements PaymentProcessor {
+        }
+    </code>
+    </pre>
+</div>
+
+<div class="example">
+    <b>All</b> `managed bean` will manged by `container` and loaded at application start time. <br>
+    given following two bean
+    <pre>
+        <code>
+        @DojoComponent
+        class Baz {
+        }
+
+        @DojoComponent
+        class Foo {
+        }
+        </code>
+    </pre>
+    <span class="variable" data-name="beanName">Foo</span> are able to retrieved by `container.retrieveBean` method:
+    <span class="assertion" data-expect="equal" data-action="retrieveBean" data-params="beanName">Foo</span>
+    <br>
+    <span class="variable" data-name="beanName">Baz</span> are able to retrieved by `container.retrieveBean` method:
+    <span class="assertion" data-expect="equal" data-action="retrieveBean" data-params="beanName">Baz</span>
+</div>
+
+
 </body>
 </html>
