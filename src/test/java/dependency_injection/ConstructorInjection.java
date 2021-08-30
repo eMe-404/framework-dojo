@@ -23,7 +23,7 @@ public class ConstructorInjection {
         final DojoContainer plainContainer = DojoContextUtils.newContainer();
         final MoreInjectionPointBean moreInjectAnnotatedBean = new MoreInjectionPointBean();
         try {
-            plainContainer.register(moreInjectAnnotatedBean);
+            plainContainer.register(moreInjectAnnotatedBean.getClass());
         } catch (DojoContextInitException exp) {
             return exp.getClass().getSimpleName();
         }

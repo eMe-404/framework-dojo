@@ -19,6 +19,6 @@ public class DojoContextUtils {
     }
 
     public static DojoContainer newContainer() {
-        return new DojoContainer();
+        return DojoContainer.initWithDefaultSetup();
     }
 }
