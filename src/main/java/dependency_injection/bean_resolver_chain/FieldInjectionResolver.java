@@ -2,13 +2,16 @@ package dependency_injection.bean_resolver_chain;
 
 import dependency_injection.DojoContainer;
 import dependency_injection.exception.DojoContextInitException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 public class FieldInjectionResolver extends BeanResolver {
     public FieldInjectionResolver(final DojoContainer container) {
@@ -44,28 +47,48 @@ public class FieldInjectionResolver extends BeanResolver {
     }
 
     private void resolveBeanFieldInjection(final Class<?> aClass, final List<Field> injectionPointFields) {
-        injectionPointFields.forEach(field -> {
-            try {
-                final String filedTypeSimpleName = field.getType().getSimpleName();
-                if (!containerBeanFactory.containsKey(filedTypeSimpleName)) {
-                    resolveBean(field.getType());
-                }
-                final Object resolvedBean = containerBeanFactory.get(filedTypeSimpleName);
-                final Object classInstance;
-                if (!containerBeanFactory.containsKey(aClass.getSimpleName())) {
-                    classInstance = aClass.getDeclaredConstructor().newInstance();
-                } else {
-                    classInstance = containerBeanFactory.get(aClass.getSimpleName());
-                }
-                final boolean canAccess = field.canAccess(classInstance);
-                field.setAccessible(true);
-                field.set(classInstance, resolvedBean);
-                field.setAccessible(canAccess);
-                containerBeanFactory.put(aClass.getSimpleName(), classInstance);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        });
+        injectionPointFields.forEach(field -> resolve(aClass, field));
+    }
+
+    private void resolve(Class<?> aClass, Field field) {
+        try {
+            final Object resolvedBean = retrieveDependencyBean(field);
+            final Object classInstance = setFieldValue(aClass, field, resolvedBean);
+            containerBeanFactory.put(aClass.getSimpleName(), classInstance);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Object setFieldValue(Class<?> aClass, Field field, Object resolvedBean) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        final Object classInstance;
+        if (!containerBeanFactory.containsKey(aClass.getSimpleName())) {
+            classInstance = aClass.getDeclaredConstructor().newInstance();
+        } else {
+            classInstance = containerBeanFactory.get(aClass.getSimpleName());
+        }
+        final boolean canAccess = field.canAccess(classInstance);
+        field.setAccessible(true);
+        field.set(classInstance, resolvedBean);
+        field.setAccessible(canAccess);
+        return classInstance;
+    }
+
+    private Object retrieveDependencyBean(Field field) {
+        Class<?> fieldType = field.getType();
+
+        String filedTypeSimpleName = fieldType.getSimpleName();
+
+        if (!containerBeanFactory.containsKey(filedTypeSimpleName)) {
+            currentContainer.register(fieldType);
+        }
+
+        if (fieldType.isInterface()) {
+            Named namedAnnotation = Optional.ofNullable(field.getAnnotation(Named.class))
+                    .orElseThrow(DojoContextInitException::new);
+            filedTypeSimpleName = namedAnnotation.value();
+        }
+        return containerBeanFactory.get(filedTypeSimpleName);
     }
 
 

@@ -10,7 +10,7 @@
         annotation</h3>
     there is following ways to specify a <b>Qualifier</b>
     <ul>
-        <li>named Qualifier can be specified by @Qualifier(String name)</li>
+        <li>named Qualifier can be specified by @Named(value = "name")</li>
         <li>custom Qualifier can be specified by @CustomQualifier</li>
         e.g. -> following is custom qualifier definition
         <pre>
@@ -42,7 +42,49 @@
         </pre>
     </ul>
     <br>
+    <h3>named qualifier usage</h3>
+    given following code snippet, we can select specific bean implementation by <b>named qualifier</b>
+    <pre>
+    <code>
+        @DojoComponent
+        class SynchronousPaymentProcessor implements PaymentProcessor {
+        }
+
+        @DojoComponent
+        class AsynchronousPaymentProcessor implements PaymentProcessor {
+        }
+
+        @DojoComponent
+        class FooWithNamedQualifier {
+            // below @Synchronous  are self defined @Qualifier
+            @Inject
+            @Named(value = "SynchronousPaymentProcessor")
+            PaymentProcessor paymentProcessor;
+        }
+
+        @DojoComponent
+        class BazWithNamedQualifier {
+            // below @Asynchronous  are self defined @Qualifier
+            private PaymentProcessor paymentProcessor;
+
+            @Inject
+            public BazWithNamedQualifier(@Named(value = "AsynchronousPaymentProcessor") PaymentProcessor paymentProcessor){
+                this.paymentProcessor = paymentProcessor;
+            }
+        }
+    </code>
+    </pre>
+    in above code <br>
+    <span class="variable" data-name="injectionBean">FooWithNamedQualifier</span>
+    injects <span class="assertion" data-expect="equal" data-action="retrievePaymentProcessor"
+                  data-params="injectionBean">SynchronousPaymentProcessor</span><br>
+
+    <span class="variable" data-name="injectionBean">BazWithNamedQualifier</span>
+    injects <span class="assertion" data-expect="equal" data-action="retrievePaymentProcessor"
+                  data-params="injectionBean">AsynchronousPaymentProcessor</span><br>
+
     <br>
+    <h3>custom qualifier usage</h3>
     given following code snippet, we can select specific bean by customer qualifier
     <pre>
     <code>

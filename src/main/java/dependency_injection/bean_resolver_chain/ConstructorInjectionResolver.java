@@ -2,13 +2,19 @@ package dependency_injection.bean_resolver_chain;
 
 import dependency_injection.DojoContainer;
 import dependency_injection.exception.DojoContextInitException;
+import dependency_injection.utils.QualifierUtility;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 public class ConstructorInjectionResolver extends BeanResolver {
     public ConstructorInjectionResolver(final DojoContainer container) {
@@ -60,16 +66,28 @@ public class ConstructorInjectionResolver extends BeanResolver {
     private Object instantiateWithMultiArgument(final Constructor<?> injectionPointConstructor)
             throws InstantiationException, IllegalAccessException, InvocationTargetException {
         List<Object> constructorArguments = new LinkedList<>();
-        for (Class<?> parameterType : injectionPointConstructor.getParameterTypes()) {
-            if (!containerBeanFactory.containsKey(parameterType.getSimpleName())) {
-                currentContainer.register(parameterType);
+        Class<?>[] parameterTypes = injectionPointConstructor.getParameterTypes();
+        Annotation[][] parameterAnnotations = injectionPointConstructor.getParameterAnnotations();
+
+        IntStream.range(0, parameterTypes.length).forEachOrdered(index -> {
+            Class<?> currentParameterClass = parameterTypes[index];
+            String simpleName = currentParameterClass.getSimpleName();
+
+            if (!containerBeanFactory.containsKey(simpleName)) {
+                currentContainer.register(currentParameterClass);
             }
-            final Object resolvedBean = containerBeanFactory.get(parameterType.getSimpleName());
+
+            if (currentParameterClass.isInterface()) {
+                Annotation[] currentParameterAnnotations = parameterAnnotations[index];
+
+                simpleName = QualifierUtility.retrieveNamedAnnotationValue(currentParameterAnnotations);
+            }
+
+            final Object resolvedBean = containerBeanFactory.get(simpleName);
             constructorArguments.add(resolvedBean);
-        }
+        });
+
         return injectionPointConstructor.newInstance(constructorArguments.toArray());
     }
-
-
 
 }
