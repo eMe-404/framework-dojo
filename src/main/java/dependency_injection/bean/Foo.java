@@ -10,4 +10,8 @@ public class Foo {
     public String sayHi() {
         return WELCOME_MESSAGE;
     }
+
+    public String retrieveProcessorName() {
+        return null;
+    }
 }

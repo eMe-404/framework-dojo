@@ -15,4 +15,8 @@ public class Baz {
     public String retrieveGreeterBless() {
         return myGreeter.sayHi();
     }
+
+    public String retrieveProcessorName() {
+        return null;
+    }
 }

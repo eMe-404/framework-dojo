@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ManagedBean</title>
+</head>
+<body>
+<div class="example">
+    <h3>if an interface implemented by multiple bean, the specific bean implementation can be selected by @Qualifier
+        annotation</h3>
+    there is following ways to specify a <b>Qualifier</b>
+    <ul>
+        <li>named Qualifier can be specified by @Qualifier(String name)</li>
+        <li>custom Qualifier can be specified by @CustomQualifier</li>
+        e.g. -> following is custom qualifier definition
+        <pre>
+            <code>
+            @Qualifier
+            @Retention(RUNTIME)
+            @Target({METHOD, FIELD, PARAMETER, TYPE})
+            public @interface Synchronous {
+            }
+            </code>
+        </pre>
+        <li>default Qualifier can be ignored</li>
+        <pre>
+            <code>
+
+                //the following two are equivalent
+                public class Order {
+                    @Inject
+                    public Order(@Default OrderProcessor processor) {
+                    }
+                }
+
+                public class Order {
+                    @Inject
+                    public Order(OrderProcessor processor) {
+                    }
+                }
+            </code>
+        </pre>
+    </ul>
+    <br>
+    <br>
+    given following code snippet, we can select specific bean by customer qualifier
+    <pre>
+    <code>
+        @DojoComponent
+        @Synchronous
+        class SynchronousPaymentProcessor implements PaymentProcessor {
+        }
+
+        @DojoComponent
+        @Asynchronous
+        class AsynchronousPaymentProcessor implements PaymentProcessor {
+        }
+
+        @DojoComponent
+        class Foo {
+            // below @Synchronous  are self defined @Qualifier
+            @Inject
+            @Synchronous
+            PaymentProcessor paymentProcessor;
+        }
+
+        @DojoComponent
+        class Baz {
+            // below @Asynchronous  are self defined @Qualifier
+            @Inject
+            @Asynchronous
+            PaymentProcessor paymentProcessor;
+        }
+    </code>
+    </pre>
+    in above code <br>
+    <span class="variable" data-name="injectionBean">Foo</span>
+    injects <span class="assertion" data-expect="equal" data-action="retrievePaymentProcessor"
+                  data-params="injectionBean">SynchronousPaymentProcessor</span><br>
+
+    <span class="variable" data-name="injectionBean">Baz</span>
+    injects <span class="assertion" data-expect="equal" data-action="retrievePaymentProcessor"
+                  data-params="injectionBean">AsynchronousPaymentProcessor</span><br>
+</div>
+<br>
+<br>
+
+</body>
+</html>
