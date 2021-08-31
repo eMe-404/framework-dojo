@@ -12,9 +12,10 @@ public class DefaultFallBackResolver extends BeanResolver {
     @Override
     public void resolveBean(final Class<?> beanClass) {
         try {
-            final Object newInstance = beanClass.getDeclaredConstructor().newInstance();
-
-            containerBeanFactory.put(beanClass.getSimpleName(), newInstance);
+            if (!containerBeanFactory.containsKey(beanClass.getSimpleName())) {
+                final Object newInstance = beanClass.getDeclaredConstructor().newInstance();
+                containerBeanFactory.put(beanClass.getSimpleName(), newInstance);
+            }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }

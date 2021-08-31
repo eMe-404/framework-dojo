@@ -101,9 +101,12 @@
         @DojoComponent
         class Foo {
             // below @Synchronous  are self defined @Qualifier
+            private final PaymentProcessor paymentProcessor;
+
             @Inject
-            @Synchronous
-            PaymentProcessor paymentProcessor;
+            public Foo(@Synchronous final PaymentProcessor paymentProcessor) {
+                this.paymentProcessor = paymentProcessor;
+            }
         }
 
         @DojoComponent

@@ -1,11 +1,17 @@
 package dependency_injection.bean;
 
 import dependency_injection.annotation.DojoComponent;
+import dependency_injection.bean.payment.PaymentProcessor;
+import dependency_injection.qualifier.Asynchronous;
 import javax.inject.Inject;
 
 @DojoComponent
 public class Baz {
     private final MyGreeter myGreeter;
+
+    @Inject
+    @Asynchronous
+    private PaymentProcessor paymentProcessor;
 
     @Inject
     public Baz(final MyGreeter myGreeter) {
@@ -17,6 +23,6 @@ public class Baz {
     }
 
     public String retrieveProcessorName() {
-        return null;
+        return this.paymentProcessor.getClass().getSimpleName();
     }
 }

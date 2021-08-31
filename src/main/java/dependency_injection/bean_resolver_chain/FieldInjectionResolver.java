@@ -2,7 +2,7 @@ package dependency_injection.bean_resolver_chain;
 
 import dependency_injection.DojoContainer;
 import dependency_injection.exception.DojoContextInitException;
-
+import dependency_injection.utils.QualifierUtility;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -32,9 +32,8 @@ public class FieldInjectionResolver extends BeanResolver {
 
         if (hasFieldAnnotated) {
             resolveBeanFieldInjection(beanClass, injectionPointFields);
-        } else {
-            nextResolver.resolveBean(beanClass);
         }
+        nextResolver.resolveBean(beanClass);
     }
 
     private void checkFieldInjectionEligibility(final List<Field> injectionPointFields) {
@@ -60,7 +59,8 @@ public class FieldInjectionResolver extends BeanResolver {
         }
     }
 
-    private Object setFieldValue(Class<?> aClass, Field field, Object resolvedBean) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private Object setFieldValue(Class<?> aClass, Field field, Object resolvedBean)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         final Object classInstance;
         if (!containerBeanFactory.containsKey(aClass.getSimpleName())) {
             classInstance = aClass.getDeclaredConstructor().newInstance();
@@ -84,12 +84,10 @@ public class FieldInjectionResolver extends BeanResolver {
         }
 
         if (fieldType.isInterface()) {
-            Named namedAnnotation = Optional.ofNullable(field.getAnnotation(Named.class))
-                    .orElseThrow(DojoContextInitException::new);
-            filedTypeSimpleName = namedAnnotation.value();
+            filedTypeSimpleName = Optional.ofNullable(field.getAnnotation(Named.class))
+                    .map(Named::value)
+                    .orElseGet(() -> QualifierUtility.retrieveCustomQualifiedName(field.getAnnotations()));
         }
         return containerBeanFactory.get(filedTypeSimpleName);
     }
-
-
 }

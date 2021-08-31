@@ -3,11 +3,15 @@ package dependency_injection;
 import dependency_injection.bean_resolver_chain.BeanResolver;
 import dependency_injection.annotation.DojoComponent;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Qualifier;
 import org.reflections.Reflections;
 
 public class DojoContainer {
@@ -45,18 +49,39 @@ public class DojoContainer {
         }
 
         if (aClass.isInterface()) {
-            Set<Class<?>> implementations = Collections.unmodifiableSet(this.reflections.getSubTypesOf(aClass));
-            implementations.forEach(implementClass -> {
-                if (resolvedBeansFactory.containsKey(implementClass.getSimpleName())) {
-                    return;
-                }
-                
-                beanResolver.resolveBean(implementClass);
-            });
+            resolveImplementation(aClass);
             return;
         }
 
         beanResolver.resolveBean(aClass);
+    }
+
+    private void resolveImplementation(final Class<?> aClass) {
+        Set<Class<?>> implementations = Collections.unmodifiableSet(this.reflections.getSubTypesOf(aClass));
+        implementations.forEach(implementClass -> {
+            if (resolvedBeansFactory.containsKey(implementClass.getSimpleName())) {
+                return;
+            }
+
+            beanResolver.resolveBean(implementClass);
+            tryToAddCustomQualifiedBeanReference(implementClass);
+        });
+    }
+
+    private void tryToAddCustomQualifiedBeanReference(final Class<?> implementClass) {
+        final Optional<? extends Class<? extends Annotation>> optionalCustomQualifierName = Arrays.stream(implementClass.getAnnotations())
+                .map(Annotation::annotationType)
+                .filter(annotationType -> annotationType.isAnnotationPresent(Qualifier.class))
+                .findAny();
+
+        if (optionalCustomQualifierName.isPresent()) {
+            final Class<? extends Annotation> customQualifier = optionalCustomQualifierName.get();
+            if (resolvedBeansFactory.containsKey(customQualifier.getSimpleName())) {
+                return;
+            }
+            final Object implementationManagedInstance = resolvedBeansFactory.get(implementClass.getSimpleName());
+            resolvedBeansFactory.put(customQualifier.getSimpleName(), implementationManagedInstance);
+        }
     }
 
     public String initMessage() {
