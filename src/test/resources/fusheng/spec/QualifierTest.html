@@ -56,7 +56,6 @@
 
         @DojoComponent
         class FooWithNamedQualifier {
-            // below @Synchronous  are self defined @Qualifier
             @Inject
             @Named(value = "SynchronousPaymentProcessor")
             PaymentProcessor paymentProcessor;
@@ -64,7 +63,6 @@
 
         @DojoComponent
         class BazWithNamedQualifier {
-            // below @Asynchronous  are self defined @Qualifier
             private PaymentProcessor paymentProcessor;
 
             @Inject
@@ -100,7 +98,6 @@
 
         @DojoComponent
         class Foo {
-            // below @Synchronous  are self defined @Qualifier
             private final PaymentProcessor paymentProcessor;
 
             @Inject
@@ -111,7 +108,6 @@
 
         @DojoComponent
         class Baz {
-            // below @Asynchronous  are self defined @Qualifier
             @Inject
             @Asynchronous
             PaymentProcessor paymentProcessor;

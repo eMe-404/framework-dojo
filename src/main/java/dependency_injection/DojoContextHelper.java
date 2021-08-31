@@ -2,10 +2,10 @@ package dependency_injection;
 
 import java.util.Objects;
 
-public class DojoContextUtils {
+public class DojoContextHelper {
     private static DojoContainer dojoContainer;
 
-    private DojoContextUtils() {
+    private DojoContextHelper() {
     }
 
     public static void initApplication() {

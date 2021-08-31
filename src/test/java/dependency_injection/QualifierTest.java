@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 @FuShengTest
 public class QualifierTest {
     public Object retrievePaymentProcessor(String injectionBean) {
-        DojoContextUtils.initApplication();
-        DojoContainer dojoContainer = DojoContextUtils.retrieveDojoContainer();
+        DojoContextHelper.initApplication();
+        DojoContainer dojoContainer = DojoContextHelper.retrieveDojoContainer();
         final Object retrievedBean = dojoContainer.retrieveBean(injectionBean);
         try {
             final Method processorMethod = retrievedBean.getClass().getMethod("retrieveProcessorName");

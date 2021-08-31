@@ -7,14 +7,14 @@ import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 public class DojoContainerTest {
 
     public String retrieveActiveContainer() {
-        DojoContextUtils.initApplication();
-        DojoContainer dojoContainer = DojoContextUtils.retrieveDojoContainer();
+        DojoContextHelper.initApplication();
+        DojoContainer dojoContainer = DojoContextHelper.retrieveDojoContainer();
         return dojoContainer.initMessage();
     }
 
     public String retrieveBean(String beanName) {
-        DojoContextUtils.initApplication();
-        DojoContainer dojoContainer = DojoContextUtils.retrieveDojoContainer();
+        DojoContextHelper.initApplication();
+        DojoContainer dojoContainer = DojoContextHelper.retrieveDojoContainer();
         final Object obj = dojoContainer.retrieveBean(beanName);
         return obj.getClass().getSimpleName();
     }

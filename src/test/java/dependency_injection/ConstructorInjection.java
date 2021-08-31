@@ -10,8 +10,8 @@ import dependency_injection.exception.DojoContextInitException;
 @FuShengTest
 public class ConstructorInjection {
     public String retrieveGreeterBless(String clientBeanName) {
-        DojoContextUtils.initApplication();
-        DojoContainer dojoContainer = DojoContextUtils.retrieveDojoContainer();
+        DojoContextHelper.initApplication();
+        DojoContainer dojoContainer = DojoContextHelper.retrieveDojoContainer();
         if (clientBeanName.equals("Baz")) {
             final Baz baz = (Baz) dojoContainer.retrieveBean(clientBeanName);
             return baz.retrieveGreeterBless();
@@ -20,7 +20,7 @@ public class ConstructorInjection {
     }
 
     public String moreInjectAnnotationCase() {
-        final DojoContainer plainContainer = DojoContextUtils.newContainer();
+        final DojoContainer plainContainer = DojoContextHelper.newContainer();
         final MoreInjectionPointBean moreInjectAnnotatedBean = new MoreInjectionPointBean();
         try {
             plainContainer.register(moreInjectAnnotatedBean.getClass());
