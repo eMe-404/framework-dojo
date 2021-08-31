@@ -12,6 +12,7 @@ public abstract class BeanResolver {
         final BeanResolver constructorResolver = new ConstructorInjectionResolver(container);
         final BeanResolver filedResolver = new FieldInjectionResolver(container);
         final BeanResolver defaultFallBackResolver = new DefaultFallBackResolver(container);
+
         constructorResolver.setNextResolver(filedResolver);
         filedResolver.setNextResolver(defaultFallBackResolver);
         return constructorResolver;

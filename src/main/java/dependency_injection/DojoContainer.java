@@ -1,25 +1,31 @@
 package dependency_injection;
 
-import dependency_injection.bean_resolver_chain.BeanResolver;
 import dependency_injection.annotation.DojoComponent;
-
+import dependency_injection.bean_resolver_chain.BeanResolver;
+import dependency_injection.exception.DojoContextInitException;
 import java.lang.annotation.Annotation;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import javax.inject.Qualifier;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DojoContainer {
-    public static final String DEFAULT_PREFIX = "";
+    public static final String DEFAULT_PREFIX = "dependency_injection";
     public static final String DEFAULT_INIT_MESSAGE = "container initialized successfully";
+    private static final Logger logger = LoggerFactory.getLogger(DojoContainer.class);
+
     private final HashMap<String, Object> resolvedBeansFactory = new HashMap<>();
+    private final Reflections reflections = new Reflections(DEFAULT_PREFIX);
+    private final Deque<Class<?>> resolvingBeanStack = new ArrayDeque<>();
     private BeanResolver beanResolver;
-    private Reflections reflections = new Reflections(DEFAULT_PREFIX);
 
     public static DojoContainer initWithManagedBeans() {
         final DojoContainer dojoContainer = new DojoContainer();
@@ -48,12 +54,26 @@ public class DojoContainer {
             return;
         }
 
+
         if (aClass.isInterface()) {
             resolveImplementation(aClass);
             return;
         }
 
+        checkCircleDependency(aClass);
+
+        resolvingBeanStack.push(aClass);
+        logger.debug("resolving class {} added to resolving stack", aClass.getSimpleName());
+
         beanResolver.resolveBean(aClass);
+        resolvingBeanStack.pop();
+        logger.debug("resolving class {} removed from resolving stack", aClass.getSimpleName());
+    }
+
+    private void checkCircleDependency(final Class<?> aClass) {
+        if (resolvingBeanStack.contains(aClass)) {
+            throw new DojoContextInitException("circular dependency encountered");
+        }
     }
 
     private void resolveImplementation(final Class<?> aClass) {
@@ -63,7 +83,15 @@ public class DojoContainer {
                 return;
             }
 
+            resolvingBeanStack.push(implementClass);
+
+            logger.debug("resolving interface implementation class {} added to resolving stack ", implementClass.getSimpleName());
+
             beanResolver.resolveBean(implementClass);
+
+            logger.debug("resolving interface implementation class {} removed from resolving stack", implementClass.getSimpleName());
+            resolvingBeanStack.pop();
+
             tryToAddCustomQualifiedBeanReference(implementClass);
         });
     }
