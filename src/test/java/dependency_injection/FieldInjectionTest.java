@@ -4,7 +4,7 @@ import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
 import dependency_injection.bean.Bar;
 
 @FuShengTest
-public class FieldInjection {
+public class FieldInjectionTest {
     public String retrieveGreeterBless(String clientBeanName) {
         DojoContextHelper.initApplication();
 

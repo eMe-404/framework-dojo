@@ -8,7 +8,7 @@ import dependency_injection.bean.MoreInjectionPointBean;
 import dependency_injection.exception.DojoContextInitException;
 
 @FuShengTest
-public class ConstructorInjection {
+public class ConstructorInjectionTest {
     public String retrieveGreeterBless(String clientBeanName) {
         DojoContextHelper.initApplication();
         DojoContainer dojoContainer = DojoContextHelper.retrieveDojoContainer();
