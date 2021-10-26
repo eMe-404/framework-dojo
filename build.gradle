@@ -13,6 +13,7 @@ buildscript {
 plugins {
     id 'java'
     id 'idea'
+    id "io.freefair.lombok" version "6.2.0"
 //    id "com.github.eMe-404.fusheng-plugin" version "1.0.0"
 }
 
@@ -35,6 +36,7 @@ dependencies {
     implementation 'org.reflections:reflections:0.9.11'
     testImplementation 'io.github.thxno:fusheng-runner:1.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
 }
 
 test {

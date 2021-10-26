@@ -1,4 +1,4 @@
-package unit_test;
+package dependency_injection.unit_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
