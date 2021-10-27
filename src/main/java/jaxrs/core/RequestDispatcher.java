@@ -4,9 +4,11 @@ import jaxrs.model.MatchedResource;
 import jaxrs.model.RootResourceClassMatchingResult;
 import jaxrs.utils.URIHelper;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -25,15 +27,29 @@ public class RequestDispatcher {
 
         Set<Class<?>> matchedClasses = classesWithPath.keySet().stream()
                 .filter(clazz -> requestUriPath.matches(URIHelper.normalizePath(classesWithPath.get(clazz))))
-                .collect(Collectors.toSet());
+                .sorted(Comparator.comparing(clazz -> sortByLiteralCharacters(requestUriPath, classesWithPath, clazz)))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        if (matchedClasses.isEmpty()) {
-            throw new NotFoundException();
+        Class<?> chosenClass = matchedClasses.stream().findFirst().orElseThrow(BadRequestException::new);
+        Matcher selectedRegexMatcher = Pattern.compile(URIHelper.normalizePath(classesWithPath.get(chosenClass))).matcher(requestUriPath);
+        String notMatchedCapturingGroup = null;
+        if (selectedRegexMatcher.find()) {
+            notMatchedCapturingGroup = selectedRegexMatcher.group(1);
         }
 
         return RootResourceClassMatchingResult.builder()
-                .notMatchedCapturingGroup(null)
+                .notMatchedCapturingGroup(notMatchedCapturingGroup)
                 .matchedRootClasses(matchedClasses)
                 .build();
+    }
+
+    private int sortByLiteralCharacters(String requestUriPath, Map<Class<?>, String> classesWithPath, Class<?> clazz) {
+        String rootResourcePath = classesWithPath.get(clazz);
+        Pattern pattern = Pattern.compile(URIHelper.normalizePath(rootResourcePath));
+        Matcher matcher = pattern.matcher(requestUriPath);
+        if (matcher.find()) {
+            return rootResourcePath.substring(0, matcher.start(1)).length();
+        }
+        return 0;
     }
 }

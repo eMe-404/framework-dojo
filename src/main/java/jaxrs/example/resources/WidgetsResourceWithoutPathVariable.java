@@ -7,7 +7,7 @@ import javax.ws.rs.Path;
 import java.util.List;
 
 @Path("/widgets")
-public class WidgetsResource {
+public class WidgetsResourceWithoutPathVariable {
     @GET
     public List<Widget> findAllWidget() {
         return List.of(new Widget("one"), new Widget("two"));
