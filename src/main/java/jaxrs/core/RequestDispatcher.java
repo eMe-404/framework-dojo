@@ -5,8 +5,8 @@ import jaxrs.model.RootResourceClassMatchingResult;
 import jaxrs.utils.URIHelper;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,5 +51,14 @@ public class RequestDispatcher {
             return rootResourcePath.substring(0, matcher.start(1)).length();
         }
         return 0;
+    }
+
+    public Set<Method> matchResourceMethods(String capturingGroup, List<Class<?>> rootResourceClasses) {
+        if (Objects.isNull(capturingGroup) || capturingGroup.equals("/")) {
+            return rootResourceClasses.stream()
+                    .flatMap(clazz -> Arrays.stream(clazz.getDeclaredMethods()))
+                    .collect(Collectors.toSet());
+        }
+        return null;
     }
 }
