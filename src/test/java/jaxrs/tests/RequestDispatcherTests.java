@@ -85,5 +85,15 @@ public class RequestDispatcherTests {
 
             assertThat(methodNames).containsExactly(subResourceMethodName);
         }
+
+        @Test
+        void should_return_matched_resource_method_given_sub_resource_locator() {
+            String resourceMethod = "findWidget";
+
+            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/1", List.of(WidgetsResource.class));
+            Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
+
+            assertThat(methodNames).containsExactly(resourceMethod);
+        }
     }
 }

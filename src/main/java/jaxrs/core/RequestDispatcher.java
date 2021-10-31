@@ -62,17 +62,51 @@ public class RequestDispatcher {
                 .collect(Collectors.toSet());
 
         if (Objects.isNull(capturingGroup) || capturingGroup.equals("/")) {
-            return allResourceMethods;
+            return allResourceMethods.stream()
+                    .filter(method -> !method.isAnnotationPresent(Path.class) && checkRequestDesignator(method))
+                    .collect(Collectors.toSet());
         }
 
-        Method matchedSubResourceMethod = allResourceMethods.stream()
-                .filter(method -> method.isAnnotationPresent(Path.class)
-                        && Arrays.stream(method.getAnnotations())
-                        .anyMatch(annotation -> annotation.annotationType().isAnnotationPresent(HttpMethod.class)))
-                .filter(method -> capturingGroup.matches(URIHelper.normalizePath(method.getAnnotation(Path.class).value())))
-                .max(Comparator.comparingInt((Method method) -> sortByLiteralCharacters(capturingGroup, method.getAnnotation(Path.class).value())))
-                .orElseThrow(NotFoundException::new);
+        Optional<Method> optionalMatchedSubResourceMethod = allResourceMethods.stream()
+                .filter(this::checkRequestDesignator)
+                .filter(method -> {
+                    String declaredPath;
+                    if (method.isAnnotationPresent(Path.class)) {
+                        declaredPath = method.getAnnotation(Path.class).value();
+                    } else {
+                        declaredPath = method.getDeclaringClass().getAnnotation(Path.class).value();
+                    }
+                    return capturingGroup.matches(URIHelper.normalizePath(declaredPath));
+                })
+                .max(Comparator.comparingInt((Method method) -> sortByLiteralCharacters(capturingGroup, method.getAnnotation(Path.class).value())));
 
-        return Collections.singleton(matchedSubResourceMethod);
+        if (optionalMatchedSubResourceMethod.isPresent()) {
+            return Collections.singleton(optionalMatchedSubResourceMethod.get());
+        }
+
+        Optional<Method> optionalSubLocator = allResourceMethods.stream()
+                .filter(method -> method.getDeclaredAnnotations().length == 1 && method.isAnnotationPresent(Path.class))
+                .filter(method -> capturingGroup.matches(URIHelper.normalizePath(method.getAnnotation(Path.class).value())))
+                .findAny();
+        //TODO: should only found one candidate locator, if more found should throw exception
+
+        if (optionalSubLocator.isEmpty()) {
+            throw new NotFoundException();
+        }
+
+        Method resourceLocatorMethod = optionalSubLocator.get();
+        String pathTemplate = URIHelper.normalizePath(resourceLocatorMethod.getAnnotation(Path.class).value());
+        Matcher pathMatcher = Pattern.compile(pathTemplate).matcher(capturingGroup);
+
+        if (pathMatcher.matches()) {
+           return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Collections.singletonList(resourceLocatorMethod.getReturnType()));
+        }
+
+        return Collections.emptySet();
+    }
+
+    private boolean checkRequestDesignator(Method method) {
+        return Arrays.stream(method.getAnnotations())
+                .anyMatch(annotation -> annotation.annotationType().isAnnotationPresent(HttpMethod.class));
     }
 }

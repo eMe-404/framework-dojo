@@ -4,13 +4,18 @@ import jaxrs.example.entity.Widget;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 
 @Path("/widget")
 public class WidgetResource {
 
+    private final int id;
+
+    public WidgetResource(int id) {
+        this.id = id;
+    }
+
     @GET
-    public Widget findWidget(@PathParam("id") int id) {
-        return new Widget("1");
+    public Widget findWidget() {
+        return new Widget(String.valueOf(id));
     }
 }

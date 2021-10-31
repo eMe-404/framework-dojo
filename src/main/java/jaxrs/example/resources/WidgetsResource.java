@@ -10,10 +10,9 @@ import java.util.Map;
 
 @Path("/widgets")
 public class WidgetsResource {
-    @GET
     @Path("/{id}")
-    public Widget findWidgetById(@PathParam("id") int id) {
-        return new Widget("one");
+    public WidgetResource getWidget(@PathParam("id") int id) {
+        return new WidgetResource(id);
     }
 
     @GET
