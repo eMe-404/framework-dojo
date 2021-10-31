@@ -41,7 +41,7 @@ public class RequestDispatcherTests {
 
         @Test
         void should_identify_candidate_root_resource_classes_matching_the_request_given_root_path_with_path_variable() {
-            final String pathVariable = "/1";
+            final String pathVariable = "/configs";
             final String requestUriPath = "/widgets" + pathVariable;
             final List<Class<?>> rootResourceClasses = List.of(WidgetsResource.class, WidgetResource.class);
 
@@ -77,12 +77,11 @@ public class RequestDispatcherTests {
         }
 
         @Test
-        void should_return_matched_sub_resource_method_given_root_resource_class_only_contain_sub_resource_method() {
-            String subResourceMethodName = "findWidget";
-            String capturingGroup = "/1";
+        void should_return_matched_sub_resource_method_given_root_resource_class_contains_sub_resource_method() {
+            String subResourceMethodName = "retrieveConfigs";
 
-            List<Class<?>> rootResourceClasses = List.of(WidgetsResource.class);
-            Set<String> methodNames = requestDispatcher.matchResourceMethods(capturingGroup, rootResourceClasses).stream().map(Method::getName).collect(Collectors.toSet());
+            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/configs", List.of(WidgetsResource.class));
+            Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).containsExactly(subResourceMethodName);
         }
