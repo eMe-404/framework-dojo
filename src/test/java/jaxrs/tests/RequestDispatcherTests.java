@@ -3,11 +3,14 @@ package jaxrs.tests;
 import jaxrs.core.RequestDispatcher;
 import jaxrs.example.resources.WidgetResource;
 import jaxrs.example.resources.WidgetsResource;
+import jaxrs.model.MatchedResource;
 import jaxrs.model.RootResourceClassMatchingResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
 
 public class RequestDispatcherTests {
 
@@ -67,10 +71,9 @@ public class RequestDispatcherTests {
         void should_return_all_methods_in_root_resource_classes_given_capturing_group_empty() {
             String capturingGroup = "/";
             Class<WidgetsResource> resourceClassOne = WidgetsResource.class;
-            List<Class<?>> rootResourceClasses = List.of(resourceClassOne);
             String expectedMethodsName = "findAllWidget";
 
-            Set<Method> matchedMethod = requestDispatcher.matchResourceMethods(capturingGroup, rootResourceClasses);
+            Set<Method> matchedMethod = requestDispatcher.matchResourceMethods(capturingGroup, Set.of(resourceClassOne));
             Set<String> methodNames = matchedMethod.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).contains(expectedMethodsName);
@@ -80,7 +83,7 @@ public class RequestDispatcherTests {
         void should_return_matched_sub_resource_method_given_root_resource_class_contains_sub_resource_method() {
             String subResourceMethodName = "retrieveConfigs";
 
-            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/configs", List.of(WidgetsResource.class));
+            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/configs", Set.of(WidgetsResource.class));
             Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).containsExactly(subResourceMethodName);
@@ -90,10 +93,23 @@ public class RequestDispatcherTests {
         void should_return_matched_resource_method_given_sub_resource_locator() {
             String resourceMethod = "findWidget";
 
-            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/1", List.of(WidgetsResource.class));
+            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/1", Set.of(WidgetsResource.class));
             Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).containsExactly(resourceMethod);
         }
+    }
+
+    @Test
+    void should_chose_request_handler_method_based_on_http_request() {
+        String resourceMethod = "findWidget";
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        given(request.getRequestURI()).willReturn("/widgets/3");
+        given(request.getMethod()).willReturn("GET");
+
+        MatchedResource matchedResource = requestDispatcher.findMatchedSourceMethod(request, List.of(WidgetsResource.class));
+
+        assertThat(matchedResource.getMatchedResourceMethod().getName()).isEqualTo(resourceMethod);
+
     }
 }

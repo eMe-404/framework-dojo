@@ -4,10 +4,8 @@ import jaxrs.model.MatchedResource;
 import jaxrs.model.RootResourceClassMatchingResult;
 import jaxrs.utils.URIHelper;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.Path;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -15,11 +13,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RequestDispatcher {
-    public MatchedResource findMatchedSourceMethod(String requestUriPath, List<Class<?>> rootResourceClasses) {
+    public MatchedResource findMatchedSourceMethod(HttpServletRequest request, List<Class<?>> rootResourceClasses) {
+        RootResourceClassMatchingResult candidateResourceClasses = findCandidateResourceClasses(request.getRequestURI(), rootResourceClasses);
+        final Set<Method> matchedCandidateMethods = matchResourceMethods(candidateResourceClasses.getNotMatchedCapturingGroup(), candidateResourceClasses.getMatchedRootClasses());
+        Method requestHandler = matchedCandidateMethods.stream().filter(this::checkRequestDesignator).findAny().orElseThrow(NotSupportedException::new);
 
         return MatchedResource.builder()
-                .matchedResourceMethod(null)
-                .matchedResourceClass(null)
+                .matchedResourceMethod(requestHandler)
+                .matchedResourceClass(requestHandler.getDeclaringClass())
                 .build();
     }
 
@@ -56,7 +57,7 @@ public class RequestDispatcher {
         return 0;
     }
 
-    public Set<Method> matchResourceMethods(String capturingGroup, List<Class<?>> rootResourceClasses) {
+    public Set<Method> matchResourceMethods(String capturingGroup, Set<Class<?>> rootResourceClasses) {
         Set<Method> allResourceMethods = rootResourceClasses.stream()
                 .flatMap(clazz -> Arrays.stream(clazz.getDeclaredMethods()))
                 .collect(Collectors.toSet());
@@ -99,7 +100,7 @@ public class RequestDispatcher {
         Matcher pathMatcher = Pattern.compile(pathTemplate).matcher(capturingGroup);
 
         if (pathMatcher.matches()) {
-           return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Collections.singletonList(resourceLocatorMethod.getReturnType()));
+           return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Set.of(resourceLocatorMethod.getReturnType()));
         }
 
         return Collections.emptySet();

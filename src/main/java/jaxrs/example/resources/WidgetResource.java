@@ -3,6 +3,7 @@ package jaxrs.example.resources;
 import jaxrs.example.entity.Widget;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 @Path("/widget")
@@ -17,5 +18,10 @@ public class WidgetResource {
     @GET
     public Widget findWidget() {
         return new Widget(String.valueOf(id));
+    }
+
+    @POST
+    public void storeWidget() {
+
     }
 }
