@@ -1,4 +1,4 @@
-package jaxrs.model;
+package model;
 
 import lombok.Builder;
 import lombok.Getter;

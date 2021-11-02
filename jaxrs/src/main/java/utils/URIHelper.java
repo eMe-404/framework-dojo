@@ -1,6 +1,4 @@
-package jaxrs.utils;
-
-import java.util.regex.Pattern;
+package utils;
 
 public class URIHelper {
     public static String normalizePath(String rootPath) {

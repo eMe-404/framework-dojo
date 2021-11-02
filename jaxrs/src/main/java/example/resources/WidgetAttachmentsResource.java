@@ -1,7 +1,8 @@
-package jaxrs.example.resources;
+package example.resources;
 
-import jaxrs.example.entity.Attachment;
-import jaxrs.example.entity.Widget;
+
+
+import example.entity.Attachment;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

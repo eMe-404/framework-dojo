@@ -1,8 +1,8 @@
-package jaxrs.core;
+package core;
 
-import jaxrs.model.MatchedResource;
-import jaxrs.model.RootResourceClassMatchingResult;
-import jaxrs.utils.URIHelper;
+import model.MatchedResource;
+import model.RootResourceClassMatchingResult;
+import utils.URIHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -100,7 +100,7 @@ public class RequestDispatcher {
         Matcher pathMatcher = Pattern.compile(pathTemplate).matcher(capturingGroup);
 
         if (pathMatcher.matches()) {
-           return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Set.of(resourceLocatorMethod.getReturnType()));
+            return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Set.of(resourceLocatorMethod.getReturnType()));
         }
 
         return Collections.emptySet();

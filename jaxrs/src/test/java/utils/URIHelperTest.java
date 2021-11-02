@@ -1,4 +1,4 @@
-package jaxrs.utils;
+package utils;
 
 import org.junit.jupiter.api.Test;
 

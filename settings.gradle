@@ -1,2 +1,6 @@
 rootProject.name = 'framework-dojo'
+include 'jaxrs'
+include 'common'
+include 'dependency-injection'
+include 'jaxrs'
 

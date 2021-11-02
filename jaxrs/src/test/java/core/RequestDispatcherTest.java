@@ -1,10 +1,9 @@
-package jaxrs.tests;
+package core;
 
-import jaxrs.core.RequestDispatcher;
-import jaxrs.example.resources.WidgetResource;
-import jaxrs.example.resources.WidgetsResource;
-import jaxrs.model.MatchedResource;
-import jaxrs.model.RootResourceClassMatchingResult;
+import example.resources.WidgetResource;
+import example.resources.WidgetsResource;
+import model.MatchedResource;
+import model.RootResourceClassMatchingResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-public class RequestDispatcherTests {
+public class RequestDispatcherTest {
 
 
     private RequestDispatcher requestDispatcher;
@@ -96,7 +95,7 @@ public class RequestDispatcherTests {
             Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/1", Set.of(WidgetsResource.class));
             Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
 
-            assertThat(methodNames).containsExactly(resourceMethod);
+            assertThat(methodNames).contains(resourceMethod);
         }
     }
 
