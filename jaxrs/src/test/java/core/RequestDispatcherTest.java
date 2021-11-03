@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -72,7 +73,7 @@ public class RequestDispatcherTest {
             Class<WidgetsResource> resourceClassOne = WidgetsResource.class;
             String expectedMethodsName = "findAllWidget";
 
-            Set<Method> matchedMethod = requestDispatcher.matchResourceMethods(capturingGroup, Set.of(resourceClassOne));
+            Set<Method> matchedMethod = requestDispatcher.matchResourceMethods(capturingGroup, Set.of(resourceClassOne), Mockito.mock(ServletContext.class));
             Set<String> methodNames = matchedMethod.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).contains(expectedMethodsName);
@@ -82,7 +83,7 @@ public class RequestDispatcherTest {
         void should_return_matched_sub_resource_method_given_root_resource_class_contains_sub_resource_method() {
             String subResourceMethodName = "retrieveConfigs";
 
-            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/configs", Set.of(WidgetsResource.class));
+            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/configs", Set.of(WidgetsResource.class), Mockito.mock(ServletContext.class));
             Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).containsExactly(subResourceMethodName);
@@ -92,7 +93,7 @@ public class RequestDispatcherTest {
         void should_return_matched_resource_method_given_sub_resource_locator() {
             String resourceMethod = "findWidget";
 
-            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/1", Set.of(WidgetsResource.class));
+            Set<Method> matchedMethods = requestDispatcher.matchResourceMethods("/1", Set.of(WidgetsResource.class), Mockito.mock(ServletContext.class));
             Set<String> methodNames = matchedMethods.stream().map(Method::getName).collect(Collectors.toSet());
 
             assertThat(methodNames).contains(resourceMethod);

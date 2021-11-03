@@ -1,9 +1,10 @@
 package core;
 
-import model.MatchedResource;
-import model.RootResourceClassMatchingResult;
+import models.MatchedResource;
+import models.RootResourceClassMatchingResult;
 import utils.URIHelper;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import java.lang.reflect.Method;
@@ -13,9 +14,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RequestDispatcher {
-    public MatchedResource findMatchedSourceMethod(HttpServletRequest request, List<Class<?>> rootResourceClasses) {
+    public MatchedResource matchRequestHandler(HttpServletRequest request, List<Class<?>> rootResourceClasses, ServletContext servletContext) {
         RootResourceClassMatchingResult candidateResourceClasses = findCandidateResourceClasses(request.getRequestURI(), rootResourceClasses);
-        final Set<Method> matchedCandidateMethods = matchResourceMethods(candidateResourceClasses.getNotMatchedCapturingGroup(), candidateResourceClasses.getMatchedRootClasses());
+        final Set<Method> matchedCandidateMethods = matchResourceMethods(candidateResourceClasses.getNotMatchedCapturingGroup(), candidateResourceClasses.getMatchedRootClasses(), servletContext);
         Method requestHandler = matchedCandidateMethods.stream().filter(this::checkRequestDesignator).findAny().orElseThrow(NotSupportedException::new);
 
         return MatchedResource.builder()
@@ -57,7 +58,7 @@ public class RequestDispatcher {
         return 0;
     }
 
-    public Set<Method> matchResourceMethods(String capturingGroup, Set<Class<?>> rootResourceClasses) {
+    public Set<Method> matchResourceMethods(String capturingGroup, Set<Class<?>> rootResourceClasses, ServletContext servletContext) {
         Set<Method> allResourceMethods = rootResourceClasses.stream()
                 .flatMap(clazz -> Arrays.stream(clazz.getDeclaredMethods()))
                 .collect(Collectors.toSet());
@@ -100,7 +101,8 @@ public class RequestDispatcher {
         Matcher pathMatcher = Pattern.compile(pathTemplate).matcher(capturingGroup);
 
         if (pathMatcher.matches()) {
-            return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Set.of(resourceLocatorMethod.getReturnType()));
+            servletContext.setAttribute("capturingGroup", pathMatcher.group(1));
+            return matchResourceMethods(pathMatcher.group(pathMatcher.groupCount()), Set.of(resourceLocatorMethod.getReturnType()), servletContext);
         }
 
         return Collections.emptySet();

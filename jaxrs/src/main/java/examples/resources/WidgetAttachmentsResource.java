@@ -1,8 +1,8 @@
-package example.resources;
+package examples.resources;
 
 
 
-import example.entity.Attachment;
+import examples.entity.Attachment;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

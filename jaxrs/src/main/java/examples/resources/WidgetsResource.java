@@ -1,23 +1,28 @@
-package example.resources;
+package examples.resources;
 
-import example.entity.Widget;
+import examples.entity.Widget;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static examples.resources.WidgetCacheDatabase.CACHED_WIDGET_DATA;
 
 @Path("/widgets")
 public class WidgetsResource {
     @Path("/{id}")
-    public WidgetResource getWidget(@PathParam("id") int id) {
+    public WidgetResource getWidget(@PathParam("id") String id) {
         return new WidgetResource(id);
     }
 
     @GET
     public List<Widget> findAllWidget() {
-        return List.of(new Widget("one"), new Widget("two"));
+        LinkedList<Widget> widgets = new LinkedList<>();
+        CACHED_WIDGET_DATA.forEach((id, name) -> widgets.push(Widget.builder().id(id).name(name).build()));
+        return widgets;
     }
 
     @Path("/configs")

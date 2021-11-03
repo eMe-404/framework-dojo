@@ -5,7 +5,7 @@
     <title>ManagedBean</title>
 </head>
 <body>
-<div class="example">
+<div class="examples">
     a managed bean can be injected at client code' <b>constructor</b> by placing <code>@Inject</code> annotation<br>
     <pre>
     <code>
@@ -30,7 +30,7 @@
         }
     </code>
     </pre>
-    as above example MyGreeter injected at `<span class="variable" data-name="clientBeanName">Baz</span>` class's
+    as above examples MyGreeter injected at `<span class="variable" data-name="clientBeanName">Baz</span>` class's
     constructor,<br>
     and we can call <b>retrieveGreeterBless()</b> to print `MyGreeter` welcome message:
     <span class="assertion" data-expect="equal" data-action="retrieveGreeterBless" data-params="clientBeanName">hello from MyGreeter</span>
@@ -39,7 +39,7 @@
 <br>
 <br>
 
-<div class="example">
+<div class="examples">
     at most <b>ONE</b> constructor can be annotated with @Inject annotation, <br>
     if more than one annotated then the bean resolution will fail and
     <span class="assertion" data-expect="equal" data-action="moreInjectAnnotationCase">DojoContextInitException</span>

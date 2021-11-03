@@ -5,7 +5,7 @@
     <title>ManagedBean</title>
 </head>
 <body>
-<div class="example">
+<div class="examples">
     a managed bean can be injected by <b>filed</b> <br>
     <pre>
     <code>
@@ -26,14 +26,14 @@
         }
     </code>
     </pre>
-    as above example MyGreeter injected at `<span class="variable" data-name="clientBeanName">Bar</span>` class's
+    as above examples MyGreeter injected at `<span class="variable" data-name="clientBeanName">Bar</span>` class's
     filed,<br>
     and we can call <b>retrieveGreeterBless()</b> to print `MyGreeter` welcome message:
     <span class="assertion" data-expect="equal" data-action="retrieveGreeterBless" data-params="clientBeanName">hello from MyGreeter</span>
 </div>
 <br>
 <br>
-<div class="example">
+<div class="examples">
     a class can declare multiple dependency by <b>Filed</b> injection point
     <pre>
     <code>
@@ -57,7 +57,7 @@
         }
     </code>
     </pre>
-    as above example `MyGreeter` and `Foo` injected at `<span class="variable" data-name="clientBeanName">Bar</span>` class's
+    as above examples `MyGreeter` and `Foo` injected at `<span class="variable" data-name="clientBeanName">Bar</span>` class's
     filed,<br>
     and we can call <b>retrieveCombinedMessage()</b> to print welcome message from two dependency:
     <span class="assertion" data-expect="equal" data-action="retrieveCombinedMessage" data-params="clientBeanName">hello from MyGreeter AND hello from Foo</span>
