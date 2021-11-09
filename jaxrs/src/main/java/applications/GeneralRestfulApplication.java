@@ -1,5 +1,6 @@
 package applications;
 
+import java.util.Set;
 import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.core.Application;
@@ -29,5 +30,10 @@ public class GeneralRestfulApplication extends Application implements Servlet {
     @Override
     public void destroy() {
 
+    }
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        return super.getClasses();
     }
 }

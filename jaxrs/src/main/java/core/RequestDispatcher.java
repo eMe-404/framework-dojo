@@ -33,8 +33,8 @@ public class RequestDispatcher {
                 .filter(clazz -> requestUriPath.matches(URIHelper.normalizePath(classesWithPath.get(clazz))))
                 .sorted(Comparator.comparing(clazz -> sortByLiteralCharacters(requestUriPath, classesWithPath.get(clazz))))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-
         Class<?> chosenClass = matchedClasses.stream().findFirst().orElseThrow(BadRequestException::new);
+
         Matcher selectedRegexMatcher = Pattern.compile(URIHelper.normalizePath(classesWithPath.get(chosenClass))).matcher(requestUriPath);
         String notMatchedCapturingGroup = null;
         if (selectedRegexMatcher.find()) {
