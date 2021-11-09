@@ -22,7 +22,7 @@ public class RestfulServlet extends HttpServlet {
     public static final String CAPTURING_GROUP = "capturingGroup";
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
         ServletContext servletContext = getServletContext();
         RequestDispatcher requestDispatcher = new RequestDispatcher();
         try {
@@ -34,6 +34,7 @@ public class RestfulServlet extends HttpServlet {
         } finally {
             servletContext.removeAttribute(CAPTURING_GROUP);
         }
+
     }
 
     private List<Class<?>> retrieveAllResource() {
