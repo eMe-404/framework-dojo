@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,12 +21,20 @@ import models.MatchedResource;
 public class RestfulServlet extends HttpServlet {
 
     public static final String CAPTURING_GROUP = "capturingGroup";
+    private ServletContext servletContext;
+    private RequestDispatcher requestDispatcher;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        servletContext = getServletContext();
+        requestDispatcher = new RequestDispatcher();
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
-        ServletContext servletContext = getServletContext();
-        RequestDispatcher requestDispatcher = new RequestDispatcher();
         try {
+
             MatchedResource matchedResource = requestDispatcher.matchRequestHandler(req, retrieveAllResource(), servletContext);
             handleRequest(resp, servletContext, matchedResource);
 

@@ -61,7 +61,7 @@ class RestfulServletIntegrationTest {
             final List<Widget> responseWidgets = objectMapper.readValue(resultResponse, new TypeReference<>() {
             });
 
-            assertThat(responseWidgets).extracting("id").contains(1, 2, 3);
+            assertThat(responseWidgets).extracting("id").contains("1", "2", "3");
         }
 
     }
