@@ -1,39 +1,36 @@
 package applications;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Application;
-import java.io.IOException;
+import org.reflections.Reflections;
 
-public class GeneralRestfulApplication extends Application implements Servlet {
-    @Override
-    public void init(ServletConfig config) throws ServletException {
+public class GeneralRestfulApplication extends Application {
+    private final Set<Class<?>> autoRegisteredClasses;
 
+    public GeneralRestfulApplication() {
+        this.autoRegisteredClasses = new HashSet<>();
     }
 
-    @Override
-    public ServletConfig getServletConfig() {
-        return null;
+    public void register(Class<?> clazz) {
+        autoRegisteredClasses.add(clazz);
     }
 
-    @Override
-    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-
-    }
-
-    @Override
-    public String getServletInfo() {
-        return null;
-    }
-
-    @Override
-    public void destroy() {
-
+    public void register(Class<?>... classes) {
+        autoRegisteredClasses.addAll(List.of(classes));
     }
 
     @Override
     public Set<Class<?>> getClasses() {
-        return super.getClasses();
+        return autoRegisteredClasses;
+    }
+
+    public void scanPackage() {
+        //TODO: don't use reflection, try to use native class loader
+        final Reflections reflections = new Reflections();
+        final Set<Class<?>> scannedClasses = reflections.getTypesAnnotatedWith(Path.class);
+        this.register(scannedClasses.toArray(Class[]::new));
     }
 }

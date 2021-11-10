@@ -1,12 +1,11 @@
 package core;
 
+import applications.GeneralRestfulApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import examples.resources.WidgetResource;
-import examples.resources.WidgetsResource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -23,10 +22,13 @@ public class RestfulServlet extends HttpServlet {
     public static final String CAPTURING_GROUP = "capturingGroup";
     private ServletContext servletContext;
     private RequestDispatcher requestDispatcher;
+    private GeneralRestfulApplication restfulApplication;
 
     @Override
     public void init() throws ServletException {
         super.init();
+        restfulApplication = new GeneralRestfulApplication();
+        restfulApplication.scanPackage();
         servletContext = getServletContext();
         requestDispatcher = new RequestDispatcher();
     }
@@ -34,8 +36,9 @@ public class RestfulServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
         try {
+            final ArrayList<Class<?>> rootResourceClasses = new ArrayList<>(restfulApplication.getClasses());
 
-            MatchedResource matchedResource = requestDispatcher.matchRequestHandler(req, retrieveAllResource(), servletContext);
+            MatchedResource matchedResource = requestDispatcher.matchRequestHandler(req, rootResourceClasses, servletContext);
             handleRequest(resp, servletContext, matchedResource);
 
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException | IOException | RuntimeException e) {
@@ -44,10 +47,6 @@ public class RestfulServlet extends HttpServlet {
             servletContext.removeAttribute(CAPTURING_GROUP);
         }
 
-    }
-
-    private List<Class<?>> retrieveAllResource() {
-        return List.of(WidgetsResource.class, WidgetResource.class);
     }
 
 
