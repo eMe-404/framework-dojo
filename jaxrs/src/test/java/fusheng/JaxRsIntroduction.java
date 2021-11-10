@@ -6,20 +6,26 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Test;
 
 @FuShengTest
 public class JaxRsIntroduction {
     @SneakyThrows
     public String retrieveRootResource(String resourceName) {
-        String url = "http://localhost:8080/widgets/" + resourceName;
-        final HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+//        String url = "http://localhost:8080/widgets/" + resourceName;
+//        final HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+//
+//        connection.connect();
+//
+//        try (final InputStream resultStream = connection.getInputStream()) {
+//            final Scanner scanner = new Scanner(resultStream);
+//            return scanner.nextLine();
+//        }
+        return "hahah";
+    }
 
-        connection.connect();
-
-        try (final InputStream resultStream = connection.getInputStream()) {
-            final Scanner scanner = new Scanner(resultStream);
-            return scanner.nextLine();
-        }
+    @Test
+    void name() {
 
     }
 }

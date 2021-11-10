@@ -1,8 +1,11 @@
 package core;
 
 import applications.GeneralRestfulApplication;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -13,6 +16,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import examples.entity.Widget;
 import lombok.SneakyThrows;
 import models.MatchedResource;
 
@@ -34,7 +39,7 @@ public class RestfulServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             final ArrayList<Class<?>> rootResourceClasses = new ArrayList<>(restfulApplication.getClasses());
 
@@ -49,6 +54,35 @@ public class RestfulServlet extends HttpServlet {
 
     }
 
+    @SneakyThrows
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final ArrayList<Class<?>> rootResourceClasses = new ArrayList<>(restfulApplication.getClasses());
+
+        MatchedResource matchedResource = requestDispatcher.matchRequestHandler(req, rootResourceClasses, servletContext);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Widget widget = objectMapper.readValue(req.getInputStream(), Widget.class);
+
+        handlePostRequest(resp, servletContext, matchedResource, widget);
+    }
+
+    @SneakyThrows
+    private void handlePostRequest(HttpServletResponse resp, ServletContext servletContext, MatchedResource matchedResource, Object argument) {
+        Method requestHandlerMethod = matchedResource.getMatchedResourceMethod();
+        Object response1;
+        Object capturingGroup = servletContext.getAttribute(CAPTURING_GROUP);
+        if (Objects.nonNull(capturingGroup)) {
+            Constructor<?> declaredConstructor = matchedResource.getMatchedResourceClass().getDeclaredConstructor(String.class);
+            response1 = requestHandlerMethod.invoke(declaredConstructor.newInstance(capturingGroup.toString()), argument);
+            servletContext.removeAttribute(CAPTURING_GROUP);
+        } else {
+            response1 = requestHandlerMethod.invoke(matchedResource.getMatchedResourceClass().getDeclaredConstructor().newInstance(), argument);
+        }
+        Object response = response1;
+        printResponse(resp, response);
+
+    }
 
     private void handleRequest(HttpServletResponse resp, ServletContext servletContext, MatchedResource matchedResource)
             throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException, IOException {
