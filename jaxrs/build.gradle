@@ -1,5 +1,5 @@
 plugins {
-    id 'war'
+    id 'java'
     id 'idea'
     id "io.freefair.lombok" version "6.2.0"
     id 'org.gretty' version '3.0.7'
@@ -30,4 +30,8 @@ test {
 
 gretty {
     contextPath = '/'
+}
+
+jar {
+    exclude('/examples/**')
 }
