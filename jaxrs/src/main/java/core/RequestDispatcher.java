@@ -17,7 +17,10 @@ public class RequestDispatcher {
     public MatchedResource matchRequestHandler(HttpServletRequest request, List<Class<?>> rootResourceClasses, ServletContext servletContext) {
         RootResourceClassMatchingResult candidateResourceClasses = findCandidateResourceClasses(request.getRequestURI(), rootResourceClasses);
         final Set<Method> matchedCandidateMethods = matchResourceMethods(candidateResourceClasses.getNotMatchedCapturingGroup(), candidateResourceClasses.getMatchedRootClasses(), servletContext);
-        Method requestHandler = matchedCandidateMethods.stream().filter(this::checkRequestDesignator).findAny().orElseThrow(NotSupportedException::new);
+        Method requestHandler = matchedCandidateMethods.stream()
+                .filter(method -> matchRequestMethod(method, request.getMethod()))
+                .findAny()
+                .orElseThrow(NotSupportedException::new);
 
         return MatchedResource.builder()
                 .matchedResourceMethod(requestHandler)
@@ -111,5 +114,10 @@ public class RequestDispatcher {
     private boolean checkRequestDesignator(Method method) {
         return Arrays.stream(method.getAnnotations())
                 .anyMatch(annotation -> annotation.annotationType().isAnnotationPresent(HttpMethod.class));
+    }
+
+    private boolean matchRequestMethod(Method method, String requestMethod) {
+        return Arrays.stream(method.getAnnotations())
+                .anyMatch(annotation -> annotation.annotationType().getAnnotation(HttpMethod.class).value().equals(requestMethod));
     }
 }
