@@ -1,4 +1,4 @@
-package dependency_injection.bean;
+package dependency_injection.examples;
 
 import javax.inject.Inject;
 

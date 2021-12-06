@@ -1,4 +1,4 @@
-package dependency_injection.bean.payment;
+package dependency_injection.examples.payment;
 
 import dependency_injection.annotation.DojoComponent;
 

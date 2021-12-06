@@ -1,8 +1,8 @@
 package dependency_injection;
 
 import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
-import dependency_injection.bean.Baz;
-import dependency_injection.bean.MoreInjectionPointBean;
+import dependency_injection.examples.Baz;
+import dependency_injection.examples.MoreInjectionPointBean;
 import dependency_injection.exception.DojoContextInitException;
 
 @FuShengTest

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import dependency_injection.DojoContainer;
 import dependency_injection.DojoContextHelper;
-import dependency_injection.bean.CircleDependencyOne;
+import dependency_injection.examples.CircleDependencyOne;
 import dependency_injection.exception.DojoContextInitException;
 import org.junit.jupiter.api.Test;
 

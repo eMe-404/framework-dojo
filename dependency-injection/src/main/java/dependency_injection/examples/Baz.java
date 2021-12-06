@@ -1,7 +1,7 @@
-package dependency_injection.bean;
+package dependency_injection.examples;
 
 import dependency_injection.annotation.DojoComponent;
-import dependency_injection.bean.payment.PaymentProcessor;
+import dependency_injection.examples.payment.PaymentProcessor;
 import dependency_injection.qualifier.Asynchronous;
 import javax.inject.Inject;
 

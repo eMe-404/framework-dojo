@@ -1,7 +1,7 @@
 package dependency_injection;
 
 import com.thoughtworks.fusheng.integration.junit5.FuShengTest;
-import dependency_injection.bean.Bar;
+import dependency_injection.examples.Bar;
 
 @FuShengTest
 public class FieldInjectionTest {
