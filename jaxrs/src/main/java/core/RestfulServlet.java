@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import examples.entity.Widget;
 import lombok.SneakyThrows;
 import models.MatchedResource;
 
@@ -56,30 +55,42 @@ public class RestfulServlet extends HttpServlet {
 
     @SneakyThrows
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         final ArrayList<Class<?>> rootResourceClasses = new ArrayList<>(restfulApplication.getClasses());
 
         MatchedResource matchedResource = requestDispatcher.matchRequestHandler(req, rootResourceClasses, servletContext);
+        Object deserializedObject = deserializeRequestBody(req, matchedResource);
+
+        handlePostRequest(resp, servletContext, matchedResource, deserializedObject);
+    }
+
+    private Object deserializeRequestBody(HttpServletRequest req, MatchedResource matchedResource) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        Widget widget = objectMapper.readValue(req.getInputStream(), Widget.class);
+        Method matchedResourceMethod = matchedResource.getMatchedResourceMethod();
+        if (matchedResourceMethod.getParameterCount() >1) {
+            throw new RuntimeException("post request only can accept one request body param");
+        }
+        Class<?> postRequestMethodParameterType = matchedResourceMethod.getParameterTypes()[0];
 
-        handlePostRequest(resp, servletContext, matchedResource, widget);
+        return objectMapper.readValue(req.getInputStream(), postRequestMethodParameterType);
     }
 
     @SneakyThrows
-    private void handlePostRequest(HttpServletResponse resp, ServletContext servletContext, MatchedResource matchedResource, Object argument) {
+    private void handlePostRequest(HttpServletResponse resp, ServletContext servletContext, MatchedResource matchedResource, Object obj) {
         Method requestHandlerMethod = matchedResource.getMatchedResourceMethod();
-        Object response1;
+        Object response;
+
         Object capturingGroup = servletContext.getAttribute(CAPTURING_GROUP);
         if (Objects.nonNull(capturingGroup)) {
+            //TODO need to handle sub resource with post condition
             Constructor<?> declaredConstructor = matchedResource.getMatchedResourceClass().getDeclaredConstructor(String.class);
-            response1 = requestHandlerMethod.invoke(declaredConstructor.newInstance(capturingGroup.toString()), argument);
+            response = requestHandlerMethod.invoke(declaredConstructor.newInstance(capturingGroup.toString()), obj);
             servletContext.removeAttribute(CAPTURING_GROUP);
         } else {
-            response1 = requestHandlerMethod.invoke(matchedResource.getMatchedResourceClass().getDeclaredConstructor().newInstance(), argument);
+            response = requestHandlerMethod.invoke(restfulApplication.retrieveInstanceByName(matchedResource.getMatchedResourceClass().getSimpleName()), obj);
         }
-        Object response = response1;
+
         printResponse(resp, response);
 
     }
@@ -112,15 +123,14 @@ public class RestfulServlet extends HttpServlet {
     }
 
     private Object invokeResource(ServletContext servletContext, MatchedResource matchedResource, Method requestHandlerMethod)
-            throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+            throws IllegalAccessException, InvocationTargetException {
         Object response;
         Object capturingGroup = servletContext.getAttribute(CAPTURING_GROUP);
         if (Objects.nonNull(capturingGroup)) {
-            response = requestHandlerMethod.invoke(
-                    matchedResource.getMatchedResourceClass().getDeclaredConstructor(String.class).newInstance(capturingGroup.toString()));
+            response = requestHandlerMethod.invoke(restfulApplication.retrieveInstanceByName(matchedResource.getMatchedResourceClass().getSimpleName()), capturingGroup);
             servletContext.removeAttribute(CAPTURING_GROUP);
         } else {
-            response = requestHandlerMethod.invoke(matchedResource.getMatchedResourceClass().getDeclaredConstructor().newInstance());
+            response = requestHandlerMethod.invoke(restfulApplication.retrieveInstanceByName(matchedResource.getMatchedResourceClass().getSimpleName()));
         }
         return response;
     }

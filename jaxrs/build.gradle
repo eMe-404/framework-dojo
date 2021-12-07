@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
+    implementation files('dependency/dependency-injection-v1.jar')
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
@@ -34,4 +35,8 @@ gretty {
 
 jar {
     exclude('/examples/**')
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }

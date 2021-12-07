@@ -1,5 +1,6 @@
 package examples.resources;
 
+import dependency_injection.annotation.DojoComponent;
 import examples.entity.Widget;
 
 import javax.ws.rs.GET;
@@ -14,6 +15,7 @@ import java.util.Objects;
 import static examples.resources.WidgetCacheDatabase.CACHED_WIDGET_DATA;
 
 @Path("/widgets")
+@DojoComponent
 public class WidgetsResource {
     @Path("/{id}")
     public WidgetResource getWidget(@PathParam("id") String id) {
