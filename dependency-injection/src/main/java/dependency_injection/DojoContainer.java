@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DojoContainer {
-    public static final String DEFAULT_PREFIX = "dependency_injection";
+    public static final String DEFAULT_PREFIX = "";
     public static final String DEFAULT_INIT_MESSAGE = "container initialized successfully";
     private static final Logger logger = LoggerFactory.getLogger(DojoContainer.class);
 
